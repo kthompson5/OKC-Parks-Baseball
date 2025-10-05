@@ -368,20 +368,28 @@ nav.quick-links::-webkit-scrollbar{display:none}
     });
 
     // Schedule render
-    const tbody = document.querySelector("#schedule-table tbody");
-    TEAM_DATA.schedule.forEach(g => {
-      const tr = document.createElement("tr");
-      const isHome = /home/i.test(g.homeAway||"");
-      tr.innerHTML = `
-        <td>${new Date(g.date).toLocaleDateString()}</td>
-        <td>${g.opponent}</td>
-        <td>${g.location}</td>
-        <td>${g.time}</td>
-        <td class="${isHome?'home':'away'}">${g.homeAway || ""}</td>
-        <td>${g.result || ""}</td>
-      `;
-      tbody.appendChild(tr);
-    });
+    const fmtDate = (raw) => {
+    if (!raw) return "";
+    const [y, m, d] = raw.split("-").map(Number);
+    const dt = new Date(y, (m || 1) - 1, d || 1); // construct via numbers (Safari-safe)
+    return new Intl.DateTimeFormat(undefined, { weekday: 'short', month: 'short', day: 'numeric' }).format(dt);
+  };
+
+  // Schedule render
+  const tbody = document.querySelector("#schedule-table tbody");
+  TEAM_DATA.schedule.forEach(g => {
+    const tr = document.createElement("tr");
+    const isHome = /home/i.test(g.homeAway||"");
+    tr.innerHTML = `
+      <td data-label="Date">${fmtDate(g.date)}</td>
+      <td data-label="Opponent">${g.opponent}</td>
+      <td data-label="Location">${g.location}</td>
+      <td data-label="Time">${g.time}</td>
+      <td data-label="Home/Away" class="${isHome?'home':'away'}">${g.homeAway || ""}</td>
+      <td data-label="Result">${g.result || ""}</td>
+    `;
+    tbody.appendChild(tr);
+  });
 
     // Practice render
     const practiceList = document.getElementById("practice-list");
