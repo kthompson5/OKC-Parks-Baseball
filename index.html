@@ -227,7 +227,49 @@ nav.quick-links::-webkit-scrollbar{display:none}
   #schedule-table td .home, 
   #schedule-table td .away { font-weight:600; }
 }
+/* POG: make photo fill the frame; keep initials smaller */
+.pog .frame{
+  display:grid;
+  place-items:center;
+  width:100%;
+  max-width:240px;
+  aspect-ratio:1 / 1;         /* perfect square frame */
+  padding:0;                   /* remove inner padding so image can fill */
+  overflow:hidden;
+  border-radius:12px;
+}
 
+/* Default avatar (initials) stays modest */
+.pog .avatar{
+  width:96px;
+  height:96px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  font-weight:800;
+}
+
+/* When we have a photo, make it fill the frame edge-to-edge */
+.pog.has-photo .avatar{
+  width:100%;
+  height:100%;
+  border-radius:12px;          /* square with rounded corners */
+  border:0;                    /* remove red circle border */
+}
+.pog.has-photo .avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;            /* no letterboxing; no empty space */
+  border-radius:12px;
+}
+
+/* Mobile: stack nicely and keep the image big */
+@media (max-width: 760px){
+  .pog{ grid-template-columns:1fr !important; }
+  .pog .frame{ max-width:100%; }
+}
+
+	  
   </style>
 </head>
 <body>
@@ -455,24 +497,55 @@ nav.quick-links::-webkit-scrollbar{display:none}
       locationList.appendChild(li);
     });
 
-    // Player of the Game render
-    const pog = TEAM_DATA.playerOfTheGame || {};
-    const pogPlayer = TEAM_DATA.roster.find(p => p.number === pog.playerNumber);
-    if(pogPlayer){
-      const pogAvatar = document.getElementById("pog-avatar");
-      if(pogPlayer.avatar){
-        pogAvatar.innerHTML = `<img alt="${pogPlayer.name}" src="${pogPlayer.avatar}"/>`;
-      } else {
-        const initials = pogPlayer.name.split(" ").map(w=>w[0]).join("").replace(/[^A-Z]/gi,'').slice(0,3).toUpperCase();
-        pogAvatar.textContent = initials || '#';
-      }
-      document.getElementById("pog-copy").textContent = `${pogPlayer.name} (#${pogPlayer.number}) — ${pog.highlights || "Great game!"}`;
-      const tags = document.getElementById("pog-tags");
-      (pog.tags||[]).forEach(t => {
-        const s = document.createElement("span");
-        s.className = "chip"; s.textContent = t; tags.appendChild(s);
-      });
-    }
+   // Player of the Game render
+const pog = TEAM_DATA.playerOfTheGame || {};
+const pogPlayer = TEAM_DATA.roster.find(p => p.number === pog.playerNumber);
+const pogWrap = document.querySelector(".pog"); // main container
+const pogAvatar = document.getElementById("pog-avatar");
+const pogCopy = document.getElementById("pog-copy");
+const pogTags = document.getElementById("pog-tags");
+
+if (pogPlayer) {
+  // Reset avatar + tags
+  pogAvatar.innerHTML = "";
+  pogTags.innerHTML = "";
+
+  if (pogPlayer.avatar) {
+    // Show image + mark as photo version
+    pogAvatar.innerHTML = `<img alt="${pogPlayer.name}" src="${pogPlayer.avatar}" />`;
+    pogWrap.classList.add("has-photo");
+  } else {
+    // Show initials if no image
+    const initials = pogPlayer.name
+      .split(" ")
+      .map((w) => w[0])
+      .join("")
+      .replace(/[^A-Z]/gi, "")
+      .slice(0, 3)
+      .toUpperCase();
+    pogAvatar.textContent = initials || "#";
+    pogWrap.classList.remove("has-photo");
+  }
+
+  // Text and tags
+  pogCopy.textContent = `${pogPlayer.name} (#${pogPlayer.number}) — ${
+    pog.highlights || "Great game!"
+  }`;
+  (pog.tags || []).forEach((t) => {
+    const s = document.createElement("span");
+    s.className = "chip";
+    s.textContent = t;
+    pogTags.appendChild(s);
+  });
+} else {
+  // No player selected
+  pogAvatar.textContent = "#";
+  pogCopy.textContent =
+    "Select a Player of the Game below and their photo + highlights will show here.";
+  pogTags.innerHTML = "";
+  pogWrap.classList.remove("has-photo");
+}
+
 
     // Gallery render (if any)
     const gallery = document.getElementById("gallery-grid");
