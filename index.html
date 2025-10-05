@@ -184,6 +184,50 @@ nav.quick-links::-webkit-scrollbar{display:none}
   .brand h1{ font-size: clamp(28px, 9vw, 40px); }
 }
 
+/* Responsive schedule table → stacked cards on small screens */
+@media (max-width: 640px){
+  #schedule-table thead{ 
+    /* hide header; we’ll show labels via data-label */
+    position: absolute; 
+    left:-9999px; 
+    top:-9999px; 
+  }
+  #schedule-table, 
+  #schedule-table tbody, 
+  #schedule-table tr, 
+  #schedule-table td { 
+    display:block; 
+    width:100%; 
+  }
+  #schedule-table tbody tr{
+    border:1px solid #eee;
+    border-radius:12px;
+    margin:10px 0;
+    overflow:hidden;
+    background:#fff;
+    box-shadow:0 2px 6px rgba(0,0,0,.06);
+  }
+  #schedule-table td{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    padding:10px 12px;
+    border-bottom:1px solid #f2f2f2;
+  }
+  #schedule-table td:last-child{ border-bottom:none; }
+
+  /* show the column label before each cell’s value */
+  #schedule-table td::before{
+    content: attr(data-label);
+    font-weight:700;
+    opacity:.85;
+  }
+
+  /* small tweaks for readability */
+  #schedule-table td .home, 
+  #schedule-table td .away { font-weight:600; }
+}
+
   </style>
 </head>
 <body>
